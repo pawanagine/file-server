@@ -18,8 +18,8 @@ npm run start
 ```
 cd ~/file-server  # or whatever is the directory location of this repo
 docker build -t file-server:latest .
-docker image tag file-server:latest <docker_registery>/file-server:latest
-docker push <docker_registery>/file-server:latest
+docker image tag file-server:latest <docker_registry>/file-server:latest
+docker push <docker_registry>/file-server:latest
 ```
 
 ## Deploy app
