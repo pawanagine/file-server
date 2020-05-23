@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-server-service
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app: file-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-server-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-server
+  template:
+    metadata:
+      labels:
+        app: file-server
+    spec:
+      initContainers:
+      - name: init-file
+        image: centos:7
+        command:
+        - "bin/bash"
+        - "-c"
+        - "echo '<h3>Hi Folks!</h3>' > /files/index.html"
+        volumeMounts:
+        - mountPath: /files
+          name: files-dir
+      containers:
+      - name: file-server-container
+        image: pawanagine/file-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - mountPath: /files
+          name: files-dir
+        livenessProbe:
+          httpGet:
+            path: /beats
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /greet
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      volumes:
+      - name: files-dir
+        emptyDir: {}
